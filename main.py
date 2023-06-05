@@ -19,8 +19,6 @@ from langchain.schema import (AIMessage, HumanMessage, SystemMessage)
 enc = tiktoken.get_encoding("gpt2")
 MAX_NUM_TOKEN_PER_PIECE = 500
 
-chat = ChatAnthropic(model="claude-v1")
-chat_100k = ChatAnthropic(model="claude-v1-100k")
 
 
 @dataclass
@@ -83,6 +81,7 @@ def slice_transcript(total_transcripts, requirements_str):
 # Given two pieces and a set of requirements, find the piece that's more aligned with the requirement
 # Return 0 or 1 or 2, 0 meaning they are equally meet the requirement, 1 means piece_a is more relevant, 2 means
 def compare_pieces(requirements_prompt, piece_a, piece_b):
+  chat = ChatAnthropic(model="claude-v1")
   text_a = piece_a.text
   text_b = piece_b.text
 
@@ -226,6 +225,7 @@ def _extract_video_id(url):
     return video_id
 
 def ask_video_question(url, question):
+  chat_100k = ChatAnthropic(model="claude-v1-100k")
   video_id = _extract_video_id(url)
   print(f"Extracted video id {video_id} from url {url}")
   transcripts = get_video_transcript(video_id)
@@ -250,9 +250,19 @@ def ask_video_question(url, question):
   return result.content
 
 
+api_key = input("Hello, since I can't checkin the API key, please input your Anthropic API key to start with:")
+
+os.environ["ANTHROPIC_API_KEY"] = api_key
+
+youtube_url = input("Input the youtube url:")
+while True:
+  question = input("Input your question:")
+  answer = ask_video_question(url=youtube_url, question=question)
+  print(f"The answer is: {answer}")
+
 #### Example 1: 
 
-print(ask_video_question(url="https://www.youtube.com/watch?v=pdJQ8iVTwj8", question="Please summarize the video into 5 bullet points"))
+# print(ask_video_question(url="https://www.youtube.com/watch?v=pdJQ8iVTwj8", question="Please summarize the video into 5 bullet points"))
 
 
 #### Example 2:
